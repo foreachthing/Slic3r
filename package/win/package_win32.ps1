@@ -44,6 +44,7 @@ cpanm "PAR::Packer"
 
 pp `
 -a "slic3r.exe;slic3r.exe"  `
+-a "slic3r.exe;slic3r-console.exe"  `
 -a "../../lib;lib" `
 -a "../../local-lib;local-lib" `
 -a "../../slic3r.pl;slic3r.pl" `
@@ -110,10 +111,8 @@ pp `
 -M Socket `
 -M Socket6 `
 -M Storable `
--M Sub::Defer `
 -M Sub::Exporter `
 -M Sub::Exporter::Progressive `
--M Sub::Name `
 -M Symbol `
 -M Term::Cap `
 -M Text::ParseWords `
