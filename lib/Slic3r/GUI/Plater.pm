@@ -2350,13 +2350,13 @@ sub object_menu {
 	    
 	    $frame->_append_menu_item($menu, "Rotate 90° clockwise (Y)", 'Rotate the selected object by 90° clockwise', sub {
 	    	$self->rotate(-90, Y);
-	    }, undef, 'arrow_rotate_clockwise.png');
+	    }, undef, 'arrow_rotate_y_clockwise.png');
 	    $frame->_append_menu_item($menu, "Rotate 90° counter-clockwise (Y)", 'Rotate the selected object by 90° counter-clockwise', sub {
 	    	$self->rotate(90, Y);
-	    }, undef, 'arrow_rotate_anticlockwise.png');
+	    }, undef, 'arrow_rotate_y_anticlockwise.png');
 	    $frame->_append_menu_item($menu, "Rotate 180° (Y)", 'Rotate the selected object by 180°', sub {
 	    	$self->rotate(180, Y);
-	    }, undef, 'arrow_rotate_anticlockwise.png');
+	    }, undef, 'arrow_rotate_y_anticlockwise.png');
 	    $menu->AppendSeparator();
     }
     
