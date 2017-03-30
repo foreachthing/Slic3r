@@ -6,7 +6,7 @@ use warnings;
 BEGIN {
     use FindBin;
     use lib "$FindBin::Bin/lib";
-    use local::lib "$FindBin::Bin/local-lib";
+    use local::lib '--no-create', "$FindBin::Bin/local-lib";
 }
 
 use File::Basename qw(basename);
@@ -124,6 +124,7 @@ die $@ if $@ && $opt{gui};
 if (@ARGV) {  # slicing from command line
     # apply command line config on top of default config
     my $config = Slic3r::Config->new_from_defaults;
+    $config->apply($_) for @external_configs;
     $config->apply($cli_config);
     $config->validate;
     
