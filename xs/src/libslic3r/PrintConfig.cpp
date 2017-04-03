@@ -751,7 +751,7 @@ PrintConfigDef::PrintConfigDef()
     def = this->add("max_volumetric_speed", coFloat);
     def->label = "Max volumetric speed";
     def->category = "Speed";
-    def->tooltip = "This experimental setting is used to set the maximum volumetric speed your extruder supports.";
+    def->tooltip = "If set to a non-zero value, extrusion will be limited to this volumetric speed. You may want to set it to your extruder maximum. As a hint, you can read calculated volumetric speeds in the comments of any G-code file you export from Slic3r.";
     def->sidetext = "mm³/s";
     def->cli = "max-volumetric-speed=f";
     def->min = 0;
@@ -913,6 +913,19 @@ PrintConfigDef::PrintConfigDef()
     def->full_width = true;
     def->height = 60;
     def->default_value = new ConfigOptionStrings();
+
+    def = this->add("printer_notes", coStrings);
+    def->label = "Printer notes";
+    def->tooltip = "You can put your notes regarding the printer here.";
+    def->cli = "printer-notes=s@";
+    def->multiline = true;
+    def->full_width = true;
+    def->height = 130;
+    {
+        ConfigOptionStrings* opt = new ConfigOptionStrings();
+        opt->values.push_back("");
+        def->default_value = opt;
+    }
 
     def = this->add("print_settings_id", coString);
     def->default_value = new ConfigOptionString("");

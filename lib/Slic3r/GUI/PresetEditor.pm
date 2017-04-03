@@ -1167,10 +1167,12 @@ sub options {
         use_firmware_retraction pressure_advance vibration_limit
         use_volumetric_e
         start_gcode end_gcode before_layer_gcode layer_gcode toolchange_gcode
+        notes
         nozzle_diameter extruder_offset
         retract_length retract_lift retract_speed retract_restart_extra retract_before_travel retract_layer_change wipe
         retract_length_toolchange retract_restart_extra_toolchange retract_lift_above retract_lift_below
         printer_settings_id
+        printer_notes
     );
 }
 
@@ -1184,7 +1186,6 @@ sub overridable_options {
 
 sub build {
     my $self = shift;
-    my (%params) = @_;
     
     $self->{extruders_count} = 1;
     
@@ -1231,8 +1232,7 @@ sub build {
                 }
             });
         }
-        if (!$params{no_controller})
-        {
+        unless ($Slic3r::GUI::Settings->{_}{no_controller}) {
             my $optgroup = $page->new_optgroup('USB/Serial connection');
             my $line = Slic3r::GUI::OptionsGroup::Line->new(
                 label => 'Serial port',
@@ -1369,10 +1369,22 @@ sub build {
             $optgroup->append_single_option_line($option);
         }
     }
-    
+
     $self->{extruder_pages} = [];
     $self->_build_extruder_pages;
-    $self->_update_serial_ports if (!$params{no_controller});
+    {
+        my $page = $self->add_options_page('Notes', 'note.png');
+        {
+            my $optgroup = $page->new_optgroup('Notes',
+                label_width => 0,
+            );
+            my $option = $optgroup->get_option('notes');
+            $option->full_width(1);
+            $option->height(250);
+            $optgroup->append_single_option_line($option);
+        }
+    }
+    $self->_update_serial_ports unless $Slic3r::GUI::Settings->{_}{no_controller};
 }
 
 sub _update_serial_ports {
