@@ -2357,10 +2357,10 @@ sub object_menu {
         $menu->AppendSeparator();
     }
     
-    $frame->_append_menu_item($menu, "Rotate 45° clockwise (Z)", 'Rotate the selected object by 45° clockwise', sub {
+    $frame->_append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
         $self->rotate(-45, Z);
     }, undef, 'arrow_rotate_clockwise.png');
-    $frame->_append_menu_item($menu, "Rotate 45° counter-clockwise (Z)", 'Rotate the selected object by 45° counter-clockwise', sub {
+    $frame->_append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
         $self->rotate(+45, Z);
     }, undef, 'arrow_rotate_anticlockwise.png');
 
