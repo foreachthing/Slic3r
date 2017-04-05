@@ -569,21 +569,20 @@ sub _on_change_combobox {
 }
 
 sub _on_select_preset {
-	my ($self, $group) = @_;
+    my ($self, $group) = @_;
 	
-	my @presets = $self->selected_presets($group);
+    my @presets = $self->selected_presets($group);
 	
-	my $s_presets = $Slic3r::GUI::Settings->{presets};
-	my $changed = !$s_presets->{$group} || $s_presets->{$group} ne $presets[0]->name;
+    my $s_presets = $Slic3r::GUI::Settings->{presets};
+    my $changed = !$s_presets->{$group} || $s_presets->{$group} ne $presets[0]->name;
     $s_presets->{$group} = $presets[0]->name;
     $s_presets->{"${group}_${_}"} = $presets[$_]->name for 1..$#presets;
 	
-	wxTheApp->save_settings;
+    wxTheApp->save_settings;
 	
-	# Ignore overrides in the plater, we only care about the preset configs.
-	my $config = $self->config(1);
+    my $config = $self->config;
 	
-	$self->on_extruders_change(scalar @{$config->get('nozzle_diameter')});
+    $self->on_extruders_change(scalar @{$config->get('nozzle_diameter')});
     
     if ($group eq 'print') {
         my $o_config = $self->{settings_override_config};
@@ -598,11 +597,10 @@ sub _on_select_preset {
         
         # Add/remove options (we do it this way for preserving current options)
         foreach my $opt_key (@$overridable) {
-            # Populate option with the default value taken from configuration
-            # (re-set the override always, because if we here it means user
-            # switched to this preset or opened/closed the editor, so he expects
-            # the new values set in the editor to be used).
-            $o_config->set($opt_key, $config->get($opt_key));
+            if (!$o_config->has($opt_key)) {
+                # Populate option with the default value taken from configuration
+                $o_config->set($opt_key, $config->get($opt_key));
+            }
         }
         foreach my $opt_key (@{$o_config->get_keys}) {
             # Keep options listed among overridable and options added on the fly
@@ -786,7 +784,7 @@ sub show_preset_editor {
 
 # Returns the current config by merging the selected presets and the overrides.
 sub config {
-    my ($self, $ignore_overrides) = @_;
+    my ($self) = @_;
     
     # use a DynamicConfig because FullPrintConfig is not enough
     my $config = Slic3r::Config->new_from_defaults;
@@ -819,8 +817,7 @@ sub config {
         $config->apply($filament_config);
     }
     $config->apply($_->dirty_config) for @{ $presets{print} };
-    $config->apply($self->{settings_override_config})
-        unless $ignore_overrides;
+    $config->apply($self->{settings_override_config});
     
     return $config;
 }
@@ -1097,23 +1094,6 @@ sub set_number_of_copies {
     } elsif ($diff < 0) {
         $self->decrease(-$diff);
     }
-}
-
-sub center_selected_object_on_bed {
-    my ($self) = @_;
-    
-    my ($obj_idx, $object) = $self->selected_object;
-    return if !defined $obj_idx;
-    
-    my $model_object = $self->{model}->objects->[$obj_idx];
-    my $bb = $model_object->bounding_box;
-    my $size = $bb->size;
-    my $vector = Slic3r::Pointf->new(
-        -$bb->x_min - $size->x/2,
-        -$bb->y_min - $size->y/2,
-    );
-    $_->offset->translate(@$vector) for @{$model_object->instances};
-    $self->refresh_canvases;
 }
 
 sub rotate {
@@ -1424,12 +1404,12 @@ sub async_apply_config {
     $self->{toolpaths2D}->reload_print if $self->{toolpaths2D};
     $self->{preview3D}->reload_print if $self->{preview3D};
     
-    if (!$Slic3r::GUI::Settings->{_}{background_processing}) {
-        $self->hide_preview if $invalidated;
-        return;
-    }
-    
     if ($invalidated) {
+        if (!$Slic3r::GUI::Settings->{_}{background_processing}) {
+            $self->hide_preview;
+            return;
+        }
+        
         # kill current thread if any
         $self->stop_background_process;
         # remove the sliced statistics box because something changed.
@@ -2352,12 +2332,8 @@ sub object_menu {
         $self->set_number_of_copies;
     }, undef, 'textfield.png');
     $menu->AppendSeparator();
-    $frame->_append_menu_item($menu, "Move to bed center", 'Center object around bed center', sub {
-        $self->center_selected_object_on_bed;
-    }, undef, 'arrow_in.png');
 
     if ($Slic3r::GUI::Settings->{_}{extended_context}){
-        $menu->AppendSeparator();
         $frame->_append_menu_item($menu, "Rotate 90° clockwise (X)", 'Rotate the selected object by 90° clockwise', sub {
             $self->rotate(-90, X);
         }, undef, 'arrow_rotate_x_clockwise.png');
@@ -2625,7 +2601,7 @@ sub new {
     EVT_BUTTON($self, wxID_OK, sub {
         wxTheApp->save_settings;
         $self->EndModal(wxID_OK);
-        $self->Destroy;
+        $self->Close;  # needed on Linux
     });
     
     $self->SetSizer($sizer);
