@@ -274,8 +274,8 @@ sub new {
         EVT_TOOL($self, TB_X90CCW, sub { $_[0]->rotate(90, X) });
         EVT_TOOL($self, TB_Y90CW, sub { $_[0]->rotate(-90, Y) });
         EVT_TOOL($self, TB_Y90CCW, sub { $_[0]->rotate(90, Y) });
-        EVT_TOOL($self, TB_45CW, sub { $_[0]->rotate(-45) });
-        EVT_TOOL($self, TB_45CCW, sub { $_[0]->rotate(45) });
+        EVT_TOOL($self, TB_45CW, sub { $_[0]->rotate(-45, Z) });
+        EVT_TOOL($self, TB_45CCW, sub { $_[0]->rotate(45, Z) });
         EVT_TOOL($self, TB_SCALE, sub { $self->changescale(undef); });
         EVT_TOOL($self, TB_SPLIT, sub { $self->split_object; });
         EVT_TOOL($self, TB_CUT, sub { $_[0]->object_cut_dialog });
@@ -291,8 +291,8 @@ sub new {
         EVT_BUTTON($self, $self->{btn_rotateX90ccw}, sub { $_[0]->rotate(90, X) });
         EVT_BUTTON($self, $self->{btn_rotateY90cw}, sub { $_[0]->rotate(-90, Y) });
         EVT_BUTTON($self, $self->{btn_rotateY90ccw}, sub { $_[0]->rotate(90, Y) });
-        EVT_BUTTON($self, $self->{btn_rotate45cw}, sub { $_[0]->rotate(-45) });
-        EVT_BUTTON($self, $self->{btn_rotate45ccw}, sub { $_[0]->rotate(45) });
+        EVT_BUTTON($self, $self->{btn_rotate45cw}, sub { $_[0]->rotate(-45, Z) });
+        EVT_BUTTON($self, $self->{btn_rotate45ccw}, sub { $_[0]->rotate(45, Z) });
         EVT_BUTTON($self, $self->{btn_changescale}, sub { $self->changescale(undef); });
         EVT_BUTTON($self, $self->{btn_split}, sub { $self->split_object; });
         EVT_BUTTON($self, $self->{btn_cut}, sub { $_[0]->object_cut_dialog });
@@ -1099,6 +1099,23 @@ sub set_number_of_copies {
     }
 }
 
+sub center_selected_object_on_bed {
+    my ($self) = @_;
+    
+    my ($obj_idx, $object) = $self->selected_object;
+    return if !defined $obj_idx;
+    
+    my $model_object = $self->{model}->objects->[$obj_idx];
+    my $bb = $model_object->bounding_box;
+    my $size = $bb->size;
+    my $vector = Slic3r::Pointf->new(
+        -$bb->x_min - $size->x/2,
+        -$bb->y_min - $size->y/2,
+    );
+    $_->offset->translate(@$vector) for @{$model_object->instances};
+    $self->refresh_canvases;
+}
+
 sub rotate {
     my $self = shift;
     my ($angle, $axis) = @_;
@@ -1407,12 +1424,12 @@ sub async_apply_config {
     $self->{toolpaths2D}->reload_print if $self->{toolpaths2D};
     $self->{preview3D}->reload_print if $self->{preview3D};
     
+    if (!$Slic3r::GUI::Settings->{_}{background_processing}) {
+        $self->hide_preview if $invalidated;
+        return;
+    }
+    
     if ($invalidated) {
-        if (!$Slic3r::GUI::Settings->{_}{background_processing}) {
-            $self->hide_preview;
-            return;
-        }
-        
         # kill current thread if any
         $self->stop_background_process;
         # remove the sliced statistics box because something changed.
@@ -2335,32 +2352,36 @@ sub object_menu {
         $self->set_number_of_copies;
     }, undef, 'textfield.png');
     $menu->AppendSeparator();
+    $frame->_append_menu_item($menu, "Move to bed center", 'Center object around bed center', sub {
+        $self->center_selected_object_on_bed;
+    }, undef, 'arrow_in.png');
 
     if ($Slic3r::GUI::Settings->{_}{extended_context}){
-	    $frame->_append_menu_item($menu, "Rotate 90° clockwise (X)", 'Rotate the selected object by 90° clockwise', sub {
-	    	$self->rotate(-90, X);
-	    }, undef, 'arrow_rotate_x_clockwise.png');
-	    $frame->_append_menu_item($menu, "Rotate 90° counter-clockwise (X)", 'Rotate the selected object by 90° counter-clockwise', sub {
-	    	$self->rotate(90, X);
-	    }, undef, 'arrow_rotate_x_anticlockwise.png');
-	    $frame->_append_menu_item($menu, "Rotate 180° (X)", 'Rotate the selected object by 180°', sub {
-	    	$self->rotate(180, X);
-	    }, undef, 'arrow_rotate_x_anticlockwise.png');
-	    $menu->AppendSeparator();
-	    
-	    $frame->_append_menu_item($menu, "Rotate 90° clockwise (Y)", 'Rotate the selected object by 90° clockwise', sub {
-	    	$self->rotate(-90, Y);
-	    }, undef, 'arrow_rotate_y_clockwise.png');
-	    $frame->_append_menu_item($menu, "Rotate 90° counter-clockwise (Y)", 'Rotate the selected object by 90° counter-clockwise', sub {
-	    	$self->rotate(90, Y);
-	    }, undef, 'arrow_rotate_y_anticlockwise.png');
-	    $frame->_append_menu_item($menu, "Rotate 180° (Y)", 'Rotate the selected object by 180°', sub {
-	    	$self->rotate(180, Y);
-	    }, undef, 'arrow_rotate_y_anticlockwise.png');
-	    $menu->AppendSeparator();
+        $menu->AppendSeparator();
+        $frame->_append_menu_item($menu, "Rotate 90° clockwise (X)", 'Rotate the selected object by 90° clockwise', sub {
+            $self->rotate(-90, X);
+        }, undef, 'arrow_rotate_x_clockwise.png');
+        $frame->_append_menu_item($menu, "Rotate 90° counter-clockwise (X)", 'Rotate the selected object by 90° counter-clockwise', sub {
+            $self->rotate(90, X);
+        }, undef, 'arrow_rotate_x_anticlockwise.png');
+        $frame->_append_menu_item($menu, "Rotate 180° (X)", 'Rotate the selected object by 180°', sub {
+            $self->rotate(180, X);
+        }, undef, 'arrow_rotate_x_anticlockwise.png');
+        $menu->AppendSeparator();
+        
+        $frame->_append_menu_item($menu, "Rotate 90° clockwise (Y)", 'Rotate the selected object by 90° clockwise', sub {
+            $self->rotate(-90, Y);
+        }, undef, 'arrow_rotate_y_clockwise.png');
+        $frame->_append_menu_item($menu, "Rotate 90° counter-clockwise (Y)", 'Rotate the selected object by 90° counter-clockwise', sub {
+            $self->rotate(90, Y);
+        }, undef, 'arrow_rotate_y_anticlockwise.png');
+        $frame->_append_menu_item($menu, "Rotate 180° (Y)", 'Rotate the selected object by 180°', sub {
+            $self->rotate(180, Y);
+        }, undef, 'arrow_rotate_y_anticlockwise.png');
+        $menu->AppendSeparator();
     }
     
-	$frame->_append_menu_item($menu, "Rotate 45° clockwise (Z)", 'Rotate the selected object by 45° clockwise', sub {
+    $frame->_append_menu_item($menu, "Rotate 45° clockwise (Z)", 'Rotate the selected object by 45° clockwise', sub {
         $self->rotate(-45, Z);
     }, undef, 'arrow_rotate_clockwise.png');
     $frame->_append_menu_item($menu, "Rotate 45° counter-clockwise (Z)", 'Rotate the selected object by 45° counter-clockwise', sub {
@@ -2604,7 +2625,7 @@ sub new {
     EVT_BUTTON($self, wxID_OK, sub {
         wxTheApp->save_settings;
         $self->EndModal(wxID_OK);
-        $self->Close;  # needed on Linux
+        $self->Destroy;
     });
     
     $self->SetSizer($sizer);
