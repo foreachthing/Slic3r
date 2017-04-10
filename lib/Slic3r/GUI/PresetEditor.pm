@@ -1329,7 +1329,7 @@ sub build {
             );
             my $option = $optgroup->get_option('start_gcode');
             $option->full_width(1);
-            $option->height(250);
+            $option->height(300);
             $optgroup->append_single_option_line($option);
         }
         {
@@ -1338,7 +1338,7 @@ sub build {
             );
             my $option = $optgroup->get_option('end_gcode');
             $option->full_width(1);
-            $option->height(250);
+            $option->height(300);
             $optgroup->append_single_option_line($option);
         }
         {
