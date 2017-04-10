@@ -1329,7 +1329,7 @@ sub build {
             );
             my $option = $optgroup->get_option('start_gcode');
             $option->full_width(1);
-            $option->height(150);
+            $option->height(250);
             $optgroup->append_single_option_line($option);
         }
         {
@@ -1338,7 +1338,7 @@ sub build {
             );
             my $option = $optgroup->get_option('end_gcode');
             $option->full_width(1);
-            $option->height(150);
+            $option->height(250);
             $optgroup->append_single_option_line($option);
         }
         {
@@ -1347,7 +1347,7 @@ sub build {
             );
             my $option = $optgroup->get_option('before_layer_gcode');
             $option->full_width(1);
-            $option->height(150);
+            $option->height(50);
             $optgroup->append_single_option_line($option);
         }
         {
@@ -1356,7 +1356,7 @@ sub build {
             );
             my $option = $optgroup->get_option('layer_gcode');
             $option->full_width(1);
-            $option->height(150);
+            $option->height(50);
             $optgroup->append_single_option_line($option);
         }
         {
@@ -1365,7 +1365,7 @@ sub build {
             );
             my $option = $optgroup->get_option('toolchange_gcode');
             $option->full_width(1);
-            $option->height(150);
+            $option->height(50);
             $optgroup->append_single_option_line($option);
         }
         {
@@ -1374,7 +1374,7 @@ sub build {
             );
             my $option = $optgroup->get_option('between_objects_gcode');
             $option->full_width(1);
-            $option->height(150);
+            $option->height(50);
             $optgroup->append_single_option_line($option);
         }
     }
