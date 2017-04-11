@@ -208,10 +208,10 @@ sub new {
         my %tbar_buttonsToolTip = (
             add             => "Adds new Objects",
             remove          => "Delete Object",
-            reset           => "Delete All",
-            arrange         => "Arrange Object",
-            increase        => "Increase Copies",
-            decrease        => "Decrease Copies",
+            reset           => "Clears the Plate of all Objects",
+            arrange         => "Automaitally arrange Objects",
+            increase        => "Add another Copy",
+            decrease        => "Remove a Copy",
             rotateX90ccw    => "Rotate around X by 90° anticlockwise",
             rotateX90cw     => "Rotate around X by 90° clockwise",
             rotateY90ccw    => "Rotate around Y by 90° anticlockwise",
@@ -220,10 +220,10 @@ sub new {
             rotateZ90cw     => "Rotate around Z by 90° clockwise",
             rotate45ccw     => "Rotate around Z by 45° anticlockwise",
             rotate45cw      => "Rotate around Z by 45° clockwise",
-            changescale     => "Scale…",
-            split           => "Split",
-            cut             => "Cut…",
-            settings        => "Settings…",
+            changescale     => "Change Scale of Object",
+            split           => "Split Object",
+            cut             => "Cut Object",
+            settings        => "Settings, Parts, Modifiers and Layers",
         );
         $self->{btoolbar} = Wx::BoxSizer->new(wxHORIZONTAL);
         for (qw(add remove reset arrange increase decrease rotateX90ccw rotateX90cw rotateY90ccw rotateY90cw rotateZ90ccw rotateZ90cw rotate45ccw rotate45cw changescale split cut settings)) {
