@@ -184,7 +184,6 @@ sub new {
         $self->{htoolbar}->AddTool(TB_CUT, "Cut…", Wx::Bitmap->new($Slic3r::var->("package.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddSeparator;
         $self->{htoolbar}->AddTool(TB_SETTINGS, "Settings…", Wx::Bitmap->new($Slic3r::var->("cog.png"), wxBITMAP_TYPE_PNG), '');
-
     } else {
         my %tbar_buttons = (
             add             => "Add…",
@@ -262,11 +261,10 @@ sub new {
             rotateX90ccw    arrow_rotate_x_anticlockwise.png
             rotateY90cw     arrow_rotate_y_clockwise.png
             rotateY90ccw    arrow_rotate_y_anticlockwise.png
-            rotateZ90cw     arrow_rotate_y_clockwise.png
-            rotateZ90ccw    arrow_rotate_y_anticlockwise.png
-
-            rotate45cw      arrow_rotate_clockwise.png
-            rotate45ccw     arrow_rotate_anticlockwise.png
+            rotateZ90cw     arrow_rotate_z_clockwise.png
+            rotateZ90ccw    arrow_rotate_z_anticlockwise.png
+            rotate45cw      arrow_rotate_z_clockwise.png
+            rotate45ccw     arrow_rotate_z_anticlockwise.png
 
             changescale     arrow_out.png
             split           shape_ungroup.png
@@ -616,7 +614,8 @@ sub _on_select_preset {
     
     wxTheApp->save_settings;
     
-    my $config = $self->config;
+    # Ignore overrides in the plater, we only care about the preset configs.
+    my $config = $self->config(1);
     
     $self->on_extruders_change(scalar @{$config->get('nozzle_diameter')});
     
@@ -633,10 +632,11 @@ sub _on_select_preset {
         
         # Add/remove options (we do it this way for preserving current options)
         foreach my $opt_key (@$overridable) {
-            if (!$o_config->has($opt_key)) {
-                # Populate option with the default value taken from configuration
-                $o_config->set($opt_key, $config->get($opt_key));
-            }
+            # Populate option with the default value taken from configuration
+            # (re-set the override always, because if we here it means user
+            # switched to this preset or opened/closed the editor, so he expects
+            # the new values set in the editor to be used).
+            $o_config->set($opt_key, $config->get($opt_key));
         }
         foreach my $opt_key (@{$o_config->get_keys}) {
             # Keep options listed among overridable and options added on the fly
@@ -820,7 +820,7 @@ sub show_preset_editor {
 
 # Returns the current config by merging the selected presets and the overrides.
 sub config {
-    my ($self) = @_;
+    my ($self, $ignore_overrides) = @_;
     
     # use a DynamicConfig because FullPrintConfig is not enough
     my $config = Slic3r::Config->new_from_defaults;
@@ -853,7 +853,8 @@ sub config {
         $config->apply($filament_config);
     }
     $config->apply($_->dirty_config) for @{ $presets{print} };
-    $config->apply($self->{settings_override_config});
+    $config->apply($self->{settings_override_config})
+        unless $ignore_overrides;
     
     return $config;
 }
@@ -1457,12 +1458,12 @@ sub async_apply_config {
     $self->{toolpaths2D}->reload_print if $self->{toolpaths2D};
     $self->{preview3D}->reload_print if $self->{preview3D};
     
+    if (!$Slic3r::GUI::Settings->{_}{background_processing}) {
+        $self->hide_preview if $invalidated;
+        return;
+    }
+    
     if ($invalidated) {
-        if (!$Slic3r::GUI::Settings->{_}{background_processing}) {
-            $self->hide_preview;
-            return;
-        }
-        
         # kill current thread if any
         $self->stop_background_process;
         # remove the sliced statistics box because something changed.
@@ -2411,10 +2412,10 @@ sub object_menu {
         
         $frame->_append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
             $self->rotate(-45, Z);
-        }, undef, 'arrow_rotate_clockwise.png');
+        }, undef, 'arrow_rotate_z_clockwise.png');
         $frame->_append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
             $self->rotate(+45, Z);
-        }, undef, 'arrow_rotate_anticlockwise.png');
+        }, undef, 'arrow_rotate_z_anticlockwise.png');
         $frame->_append_menu_item($menu, "Rotate 90° clockwise (Z)", 'Rotate the selected object by 90° clockwise', sub {
             $self->rotate(-90, Z);
         }, undef, 'arrow_rotate_z_clockwise.png');
@@ -2428,10 +2429,10 @@ sub object_menu {
     } else {    
         $frame->_append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
             $self->rotate(-45, Z);
-        }, undef, 'arrow_rotate_clockwise.png');
+        }, undef, 'arrow_rotate_z_clockwise.png');
         $frame->_append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
             $self->rotate(+45, Z);
-        }, undef, 'arrow_rotate_anticlockwise.png');
+        }, undef, 'arrow_rotate_z_anticlockwise.png');
     }
 
     my $rotateMenu = Wx::Menu->new;
@@ -2671,7 +2672,7 @@ sub new {
     EVT_BUTTON($self, wxID_OK, sub {
         wxTheApp->save_settings;
         $self->EndModal(wxID_OK);
-        $self->Close;  # needed on Linux
+        $self->Destroy;
     });
     
     $self->SetSizer($sizer);
