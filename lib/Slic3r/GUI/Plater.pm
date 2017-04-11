@@ -172,17 +172,19 @@ sub new {
         $self->{htoolbar}->AddSeparator;
         $self->{htoolbar}->AddTool(TB_X90CCW, "90° X ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_X90CW, "90° X cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_clockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_Y90CCW, "90° X ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_Y90CW, "90° X cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_clockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_Z90CCW, "90° X ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_Z90CW, "90° X cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_45CCW, "45° ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_45CW, "45° cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+        $self->{htoolbar}->AddTool(TB_Y90CCW, "90° Y ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
+        $self->{htoolbar}->AddTool(TB_Y90CW, "90° Y cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+        $self->{htoolbar}->AddTool(TB_Z90CCW, "90° Z ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
+        $self->{htoolbar}->AddTool(TB_Z90CW, "90° Z cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+        $self->{htoolbar}->AddTool(TB_45CCW, "45° ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
+        $self->{htoolbar}->AddTool(TB_45CW, "45° cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+        $self->{htoolbar}->AddSeparator;
         $self->{htoolbar}->AddTool(TB_SCALE, "Scale…", Wx::Bitmap->new($Slic3r::var->("arrow_out.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_SPLIT, "Split", Wx::Bitmap->new($Slic3r::var->("shape_ungroup.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_CUT, "Cut…", Wx::Bitmap->new($Slic3r::var->("package.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddSeparator;
         $self->{htoolbar}->AddTool(TB_SETTINGS, "Settings…", Wx::Bitmap->new($Slic3r::var->("cog.png"), wxBITMAP_TYPE_PNG), '');
+
     } else {
         my %tbar_buttons = (
             add             => "Add…",
@@ -204,10 +206,31 @@ sub new {
             cut             => "Cut…",
             settings        => "Settings…",
         );
+        my %tbar_buttonsToolTip = (
+            add             => "Adds new Objects",
+            remove          => "Delete Object",
+            reset           => "Delete All",
+            arrange         => "Arrange Object",
+            increase        => "Increase Copies",
+            decrease        => "Decrease Copies",
+            rotateX90ccw    => "Rotate around X by 90° anticlockwise",
+            rotateX90cw     => "Rotate around X by 90° clockwise",
+            rotateY90ccw    => "Rotate around Y by 90° anticlockwise",
+            rotateY90cw     => "Rotate around Y by 90° clockwise",
+            rotateZ90ccw    => "Rotate around Z by 90° anticlockwise",
+            rotateZ90cw     => "Rotate around Z by 90° clockwise",
+            rotate45ccw     => "Rotate around Z by 45° anticlockwise",
+            rotate45cw      => "Rotate around Z by 45° clockwise",
+            changescale     => "Scale…",
+            split           => "Split",
+            cut             => "Cut…",
+            settings        => "Settings…",
+        );
         $self->{btoolbar} = Wx::BoxSizer->new(wxHORIZONTAL);
         for (qw(add remove reset arrange increase decrease rotateX90ccw rotateX90cw rotateY90ccw rotateY90cw rotateZ90ccw rotateZ90cw rotate45ccw rotate45cw changescale split cut settings)) {
             $self->{"btn_$_"} = Wx::Button->new($self, -1, $tbar_buttons{$_}, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
             $self->{btoolbar}->Add($self->{"btn_$_"});
+            $self->{"btn_$_"}->SetToolTipString($tbar_buttonsToolTip{$_});
         }
     }
 
@@ -241,6 +264,7 @@ sub new {
             rotateY90ccw    arrow_rotate_y_anticlockwise.png
             rotateZ90cw     arrow_rotate_y_clockwise.png
             rotateZ90ccw    arrow_rotate_y_anticlockwise.png
+
             rotate45cw      arrow_rotate_clockwise.png
             rotate45ccw     arrow_rotate_anticlockwise.png
 

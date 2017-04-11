@@ -42,7 +42,11 @@ warn "Running Slic3r under Perl 5.16 is neither supported nor recommended\n"
 
 use FindBin;
 # Path to the images.
-our $var = sub { decode_path($FindBin::Bin) . "/var/" . $_[0] };
+my $varpath = decode_path($FindBin::Bin) . "/var";
+if ($^O eq 'darwin' && !-d $varpath) {
+    $varpath = decode_path($FindBin::Bin) . "/../Resources/var";
+}
+our $var = sub { "$varpath/$_[0]" };
 
 use Moo 1.003001;
 
@@ -99,11 +103,14 @@ sub spawn_thread {
     my $parent_tid = threads->tid;
     lock @threads;
     
+    # Set up a default handler for preventing crashes in case signals are received before
+    # thread sets its handlers.
+    $SIG{'STOP'} = sub {};
+    
     @_ = ();
     my $thread = threads->create(sub {
         @my_threads = ();
         
-        Slic3r::debugf "Starting thread %d (parent: %d)...\n", threads->tid, $parent_tid;
         local $SIG{'KILL'} = sub {
             Slic3r::debugf "Exiting thread %d...\n", threads->tid;
             $parallel_sema->up if $parallel_sema;
@@ -115,6 +122,7 @@ sub spawn_thread {
             $pause_sema->down;
             $pause_sema->up;
         };
+        Slic3r::debugf "Starting thread %d (parent: %d)...\n", threads->tid, $parent_tid;
         $cb->();
     });
     push @my_threads, $thread->tid;
