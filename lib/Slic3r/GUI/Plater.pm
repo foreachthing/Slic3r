@@ -30,6 +30,8 @@ use constant TB_X90CW   => &Wx::NewId;
 use constant TB_X90CCW  => &Wx::NewId;
 use constant TB_Y90CW   => &Wx::NewId;
 use constant TB_Y90CCW  => &Wx::NewId;
+use constant TB_Z90CW   => &Wx::NewId;
+use constant TB_Z90CCW  => &Wx::NewId;
 use constant TB_45CW    => &Wx::NewId;
 use constant TB_45CCW   => &Wx::NewId;
 use constant TB_SCALE   => &Wx::NewId;
@@ -172,6 +174,8 @@ sub new {
         $self->{htoolbar}->AddTool(TB_X90CW, "90° X cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_clockwise.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_Y90CCW, "90° X ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_Y90CW, "90° X cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+        $self->{htoolbar}->AddTool(TB_Z90CCW, "90° X ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
+        $self->{htoolbar}->AddTool(TB_Z90CW, "90° X cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_45CCW, "45° ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_45CW, "45° cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_clockwise.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_SCALE, "Scale…", Wx::Bitmap->new($Slic3r::var->("arrow_out.png"), wxBITMAP_TYPE_PNG), '');
@@ -191,6 +195,8 @@ sub new {
             rotateX90cw     => "",
             rotateY90ccw    => "",
             rotateY90cw     => "",
+            rotateZ90ccw    => "",
+            rotateZ90cw     => "",
             rotate45ccw     => "",
             rotate45cw      => "",
             changescale     => "Scale…",
@@ -199,7 +205,7 @@ sub new {
             settings        => "Settings…",
         );
         $self->{btoolbar} = Wx::BoxSizer->new(wxHORIZONTAL);
-        for (qw(add remove reset arrange increase decrease rotateX90ccw rotateX90cw rotateY90ccw rotateY90cw rotate45ccw rotate45cw changescale split cut settings)) {
+        for (qw(add remove reset arrange increase decrease rotateX90ccw rotateX90cw rotateY90ccw rotateY90cw rotateZ90ccw rotateZ90cw rotate45ccw rotate45cw changescale split cut settings)) {
             $self->{"btn_$_"} = Wx::Button->new($self, -1, $tbar_buttons{$_}, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
             $self->{btoolbar}->Add($self->{"btn_$_"});
         }
@@ -233,6 +239,8 @@ sub new {
             rotateX90ccw    arrow_rotate_x_anticlockwise.png
             rotateY90cw     arrow_rotate_y_clockwise.png
             rotateY90ccw    arrow_rotate_y_anticlockwise.png
+            rotateZ90cw     arrow_rotate_y_clockwise.png
+            rotateZ90ccw    arrow_rotate_y_anticlockwise.png
             rotate45cw      arrow_rotate_clockwise.png
             rotate45ccw     arrow_rotate_anticlockwise.png
 
@@ -274,6 +282,8 @@ sub new {
         EVT_TOOL($self, TB_X90CCW, sub { $_[0]->rotate(90, X) });
         EVT_TOOL($self, TB_Y90CW, sub { $_[0]->rotate(-90, Y) });
         EVT_TOOL($self, TB_Y90CCW, sub { $_[0]->rotate(90, Y) });
+        EVT_TOOL($self, TB_Z90CW, sub { $_[0]->rotate(-90, Z) });
+        EVT_TOOL($self, TB_Z90CCW, sub { $_[0]->rotate(90, Z) });
         EVT_TOOL($self, TB_45CW, sub { $_[0]->rotate(-45, Z) });
         EVT_TOOL($self, TB_45CCW, sub { $_[0]->rotate(45, Z) });
         EVT_TOOL($self, TB_SCALE, sub { $self->changescale(undef); });
@@ -291,6 +301,8 @@ sub new {
         EVT_BUTTON($self, $self->{btn_rotateX90ccw}, sub { $_[0]->rotate(90, X) });
         EVT_BUTTON($self, $self->{btn_rotateY90cw}, sub { $_[0]->rotate(-90, Y) });
         EVT_BUTTON($self, $self->{btn_rotateY90ccw}, sub { $_[0]->rotate(90, Y) });
+        EVT_BUTTON($self, $self->{btn_rotateZ90cw}, sub { $_[0]->rotate(-90, Z) });
+        EVT_BUTTON($self, $self->{btn_rotateZ90ccw}, sub { $_[0]->rotate(90, Z) });
         EVT_BUTTON($self, $self->{btn_rotate45cw}, sub { $_[0]->rotate(-45, Z) });
         EVT_BUTTON($self, $self->{btn_rotate45ccw}, sub { $_[0]->rotate(45, Z) });
         EVT_BUTTON($self, $self->{btn_changescale}, sub { $self->changescale(undef); });
@@ -570,18 +582,18 @@ sub _on_change_combobox {
 
 sub _on_select_preset {
     my ($self, $group) = @_;
-	
+    
     my @presets = $self->selected_presets($group);
-	
+    
     my $s_presets = $Slic3r::GUI::Settings->{presets};
     my $changed = !$s_presets->{$group} || $s_presets->{$group} ne $presets[0]->name;
     $s_presets->{$group} = $presets[0]->name;
     $s_presets->{"${group}_${_}"} = $presets[$_]->name for 1..$#presets;
-	
+    
     wxTheApp->save_settings;
-	
+    
     my $config = $self->config;
-	
+    
     $self->on_extruders_change(scalar @{$config->get('nozzle_diameter')});
     
     if ($group eq 'print') {
@@ -1335,9 +1347,9 @@ sub config_changed {
     
     # Apply changes to the plater-specific config options.
     foreach my $opt_key (@{$self->{config}->diff($config)}) {
-	    # Ignore overrides. No need to set them in our config; we'll use them directly below.
-	    next if $opt_key eq 'overrides';
-	    
+        # Ignore overrides. No need to set them in our config; we'll use them directly below.
+        next if $opt_key eq 'overrides';
+        
         $self->{config}->set($opt_key, $config->get($opt_key));
         
         if ($opt_key eq 'bed_shape') {
@@ -2098,21 +2110,21 @@ sub object_cut_dialog {
     }
     
     my $dlg = Slic3r::GUI::Plater::ObjectCutDialog->new($self,
-		object              => $self->{objects}[$obj_idx],
-		model_object        => $self->{model}->objects->[$obj_idx],
-	);
-	return unless $dlg->ShowModal == wxID_OK;
-	
-	if (my @new_objects = $dlg->NewModelObjects) {
-	    my $process_dialog = Wx::ProgressDialog->new('Loading…', "Loading new objects…", 100, $self, 0);
+        object              => $self->{objects}[$obj_idx],
+        model_object        => $self->{model}->objects->[$obj_idx],
+    );
+    return unless $dlg->ShowModal == wxID_OK;
+    
+    if (my @new_objects = $dlg->NewModelObjects) {
+        my $process_dialog = Wx::ProgressDialog->new('Loading…', "Loading new objects…", 100, $self, 0);
         $process_dialog->Pulse;
         
-	    $self->remove($obj_idx);
-	    $self->load_model_objects(grep defined($_), @new_objects);
-	    $self->arrange if @new_objects <= 2; # don't arrange for grid cuts
-	    
-	    $process_dialog->Destroy;
-	}
+        $self->remove($obj_idx);
+        $self->load_model_objects(grep defined($_), @new_objects);
+        $self->arrange if @new_objects <= 2; # don't arrange for grid cuts
+        
+        $process_dialog->Destroy;
+    }
 }
 
 sub object_settings_dialog {
@@ -2130,22 +2142,22 @@ sub object_settings_dialog {
     return unless $self->validate_config;
     
     my $dlg = Slic3r::GUI::Plater::ObjectSettingsDialog->new($self,
-		object          => $self->{objects}[$obj_idx],
-		model_object    => $model_object,
-	);
-	$self->pause_background_process;
-	$dlg->ShowModal;
-	
+        object          => $self->{objects}[$obj_idx],
+        model_object    => $model_object,
+    );
+    $self->pause_background_process;
+    $dlg->ShowModal;
+    
     # update thumbnail since parts may have changed
     if ($dlg->PartsChanged) {
-	    # recenter and re-align to Z = 0
-	    $model_object->center_around_origin;
+        # recenter and re-align to Z = 0
+        $model_object->center_around_origin;
         $self->make_thumbnail($obj_idx);
     }
-	
-	# update print
-	if ($dlg->PartsChanged || $dlg->PartSettingsChanged) {
-	    $self->stop_background_process;
+    
+    # update print
+    if ($dlg->PartsChanged || $dlg->PartSettingsChanged) {
+        $self->stop_background_process;
         $self->{print}->reload_object($obj_idx);
         $self->on_model_change;
     } else {
@@ -2188,11 +2200,11 @@ sub selection_changed {
     
     my $method = $have_sel ? 'Enable' : 'Disable';
     $self->{"btn_$_"}->$method
-        for grep $self->{"btn_$_"}, qw(remove increase decrease rotateX90cw rotateX90ccw rotateY90cw rotateY90ccw rotate45cw rotate45ccw changescale split cut settings);
+        for grep $self->{"btn_$_"}, qw(remove increase decrease rotateX90cw rotateX90ccw rotateY90cw rotateY90ccw rotateZ90cw rotateZ90ccw rotate45cw rotate45ccw changescale split cut settings);
     
     if ($self->{htoolbar}) {
         $self->{htoolbar}->EnableTool($_, $have_sel)
-            for (TB_REMOVE, TB_MORE, TB_FEWER, TB_X90CW, TB_X90CCW, TB_Y90CW, TB_Y90CCW, TB_45CW, TB_45CCW, TB_SCALE, TB_SPLIT, TB_CUT, TB_SETTINGS);
+            for (TB_REMOVE, TB_MORE, TB_FEWER, TB_X90CW, TB_X90CCW, TB_Y90CW, TB_Y90CCW, TB_Z90CW, TB_Z90CCW, TB_45CW, TB_45CCW, TB_SCALE, TB_SPLIT, TB_CUT, TB_SETTINGS);
     }
     
     if ($self->{object_info_size}) { # have we already loaded the info pane?
@@ -2221,7 +2233,7 @@ sub selection_changed {
                     $self->{object_info_manifold_warning_icon}->Show;
                     
                     # we don't show normals_fixed because we never provide normals
-	                # to admesh, so it generates normals for all facets
+                    # to admesh, so it generates normals for all facets
                     my $message = sprintf '%d degenerate facets, %d edges fixed, %d facets removed, %d facets added, %d facets reversed, %d backwards edges',
                         @$stats{qw(degenerate_facets edges_fixed facets_removed facets_added facets_reversed backwards_edges)};
                     $self->{object_info_manifold}->SetToolTipString($message);
@@ -2355,14 +2367,31 @@ sub object_menu {
             $self->rotate(180, Y);
         }, undef, 'arrow_rotate_y_anticlockwise.png');
         $menu->AppendSeparator();
+        
+        $frame->_append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
+            $self->rotate(-45, Z);
+        }, undef, 'arrow_rotate_clockwise.png');
+        $frame->_append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
+            $self->rotate(+45, Z);
+        }, undef, 'arrow_rotate_anticlockwise.png');
+        $frame->_append_menu_item($menu, "Rotate 90° clockwise (Z)", 'Rotate the selected object by 90° clockwise', sub {
+            $self->rotate(-90, Z);
+        }, undef, 'arrow_rotate_z_clockwise.png');
+        $frame->_append_menu_item($menu, "Rotate 90° counter-clockwise (Z)", 'Rotate the selected object by 90° counter-clockwise', sub {
+            $self->rotate(90, Z);
+        }, undef, 'arrow_rotate_z_anticlockwise.png');
+        $frame->_append_menu_item($menu, "Rotate 180° (Z)", 'Rotate the selected object by 180°', sub {
+            $self->rotate(180, Z);
+        }, undef, 'arrow_rotate_z_anticlockwise.png');
+        $menu->AppendSeparator();
+    } else {    
+        $frame->_append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
+            $self->rotate(-45, Z);
+        }, undef, 'arrow_rotate_clockwise.png');
+        $frame->_append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
+            $self->rotate(+45, Z);
+        }, undef, 'arrow_rotate_anticlockwise.png');
     }
-    
-    $frame->_append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
-        $self->rotate(-45, Z);
-    }, undef, 'arrow_rotate_clockwise.png');
-    $frame->_append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
-        $self->rotate(+45, Z);
-    }, undef, 'arrow_rotate_anticlockwise.png');
 
     my $rotateMenu = Wx::Menu->new;
     my $rotateMenuItem = $menu->AppendSubMenu($rotateMenu, "Rotate", 'Rotate the selected object by an arbitrary angle');
