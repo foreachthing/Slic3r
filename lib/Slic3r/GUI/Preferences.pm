@@ -71,6 +71,13 @@ sub new {
         tooltip     => 'Disable communication with the printer over a serial / USB cable. This simplifies the user interface in case the printer is never attached to the computer.',
         default     => $Slic3r::GUI::Settings->{_}{no_controller},
     ));
+    $optgroup->append_single_option_line(Slic3r::GUI::OptionsGroup::Option->new(
+        opt_id      => 'extended_context',
+        type        => 'bool',
+        label       => 'Extended Context Menu',
+        tooltip     => 'If this is enabled, the Extended Context Menu will become accessible.',
+        default     => $Slic3r::GUI::Settings->{_}{extended_context}  // 0,
+    ));
     
     my $sizer = Wx::BoxSizer->new(wxVERTICAL);
     $sizer->Add($optgroup->sizer, 0, wxEXPAND | wxBOTTOM | wxLEFT | wxRIGHT, 10);
