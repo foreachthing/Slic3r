@@ -170,14 +170,19 @@ sub new {
         $self->{htoolbar}->AddTool(TB_MORE, "More", Wx::Bitmap->new($Slic3r::var->("add.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_FEWER, "Fewer", Wx::Bitmap->new($Slic3r::var->("delete.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddSeparator;
-        $self->{htoolbar}->AddTool(TB_X90CCW, "90° X ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_X90CW, "90° X cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_clockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_Y90CCW, "90° Y ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_Y90CW, "90° Y cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_clockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_Z90CCW, "90° Z ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_Z90CW, "90° Z cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+        
+        if ($Slic3r::GUI::Settings->{_}{extended_context_toolbar}) {
+            $self->{htoolbar}->AddTool(TB_X90CCW, "90° X ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
+            $self->{htoolbar}->AddTool(TB_X90CW, "90° X cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+            $self->{htoolbar}->AddTool(TB_Y90CCW, "90° Y ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
+            $self->{htoolbar}->AddTool(TB_Y90CW, "90° Y cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+            $self->{htoolbar}->AddTool(TB_Z90CCW, "90° Z ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
+            $self->{htoolbar}->AddTool(TB_Z90CW, "90° Z cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+        } 
+		
         $self->{htoolbar}->AddTool(TB_45CCW, "45° ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_45CW, "45° cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+        
         $self->{htoolbar}->AddSeparator;
         $self->{htoolbar}->AddTool(TB_SCALE, "Scale…", Wx::Bitmap->new($Slic3r::var->("arrow_out.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_SPLIT, "Split", Wx::Bitmap->new($Slic3r::var->("shape_ungroup.png"), wxBITMAP_TYPE_PNG), '');
@@ -226,10 +231,18 @@ sub new {
             settings        => "Settings, Parts, Modifiers and Layers",
         );
         $self->{btoolbar} = Wx::BoxSizer->new(wxHORIZONTAL);
-        for (qw(add remove reset arrange increase decrease rotateX90ccw rotateX90cw rotateY90ccw rotateY90cw rotateZ90ccw rotateZ90cw rotate45ccw rotate45cw changescale split cut settings)) {
-            $self->{"btn_$_"} = Wx::Button->new($self, -1, $tbar_buttons{$_}, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-            $self->{btoolbar}->Add($self->{"btn_$_"});
-            $self->{"btn_$_"}->SetToolTipString($tbar_buttonsToolTip{$_});
+        if ($Slic3r::GUI::Settings->{_}{extended_context_toolbar}){
+            for (qw(add remove reset arrange increase decrease rotateX90ccw rotateX90cw rotateY90ccw rotateY90cw rotateZ90ccw rotateZ90cw rotate45ccw rotate45cw changescale split cut settings)) {
+                $self->{"btn_$_"} = Wx::Button->new($self, -1, $tbar_buttons{$_}, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+                $self->{btoolbar}->Add($self->{"btn_$_"});
+                $self->{"btn_$_"}->SetToolTipString($tbar_buttonsToolTip{$_});
+            }
+        } else {
+            for (qw(add remove reset arrange increase decrease rotate45ccw rotate45cw changescale split cut settings)) {
+                $self->{"btn_$_"} = Wx::Button->new($self, -1, $tbar_buttons{$_}, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+                $self->{btoolbar}->Add($self->{"btn_$_"});
+                $self->{"btn_$_"}->SetToolTipString($tbar_buttonsToolTip{$_});
+            }
         }
     }
 
@@ -300,12 +313,14 @@ sub new {
         EVT_TOOL($self, TB_ARRANGE, sub { $self->arrange; });
         EVT_TOOL($self, TB_MORE, sub { $self->increase; });
         EVT_TOOL($self, TB_FEWER, sub { $self->decrease; });
-        EVT_TOOL($self, TB_X90CW, sub { $_[0]->rotate(-90, X) });
-        EVT_TOOL($self, TB_X90CCW, sub { $_[0]->rotate(90, X) });
-        EVT_TOOL($self, TB_Y90CW, sub { $_[0]->rotate(-90, Y) });
-        EVT_TOOL($self, TB_Y90CCW, sub { $_[0]->rotate(90, Y) });
-        EVT_TOOL($self, TB_Z90CW, sub { $_[0]->rotate(-90, Z) });
-        EVT_TOOL($self, TB_Z90CCW, sub { $_[0]->rotate(90, Z) });
+        if ($Slic3r::GUI::Settings->{_}{extended_context_toolbar}){
+            EVT_TOOL($self, TB_X90CW, sub { $_[0]->rotate(-90, X) });
+            EVT_TOOL($self, TB_X90CCW, sub { $_[0]->rotate(90, X) });
+            EVT_TOOL($self, TB_Y90CW, sub { $_[0]->rotate(-90, Y) });
+            EVT_TOOL($self, TB_Y90CCW, sub { $_[0]->rotate(90, Y) });
+            EVT_TOOL($self, TB_Z90CW, sub { $_[0]->rotate(-90, Z) });
+            EVT_TOOL($self, TB_Z90CCW, sub { $_[0]->rotate(90, Z) });
+        }
         EVT_TOOL($self, TB_45CW, sub { $_[0]->rotate(-45, Z) });
         EVT_TOOL($self, TB_45CCW, sub { $_[0]->rotate(45, Z) });
         EVT_TOOL($self, TB_SCALE, sub { $self->changescale(undef); });
@@ -319,12 +334,14 @@ sub new {
         EVT_BUTTON($self, $self->{btn_arrange}, sub { $self->arrange; });
         EVT_BUTTON($self, $self->{btn_increase}, sub { $self->increase; });
         EVT_BUTTON($self, $self->{btn_decrease}, sub { $self->decrease; });
-        EVT_BUTTON($self, $self->{btn_rotateX90cw}, sub { $_[0]->rotate(-90, X) });
-        EVT_BUTTON($self, $self->{btn_rotateX90ccw}, sub { $_[0]->rotate(90, X) });
-        EVT_BUTTON($self, $self->{btn_rotateY90cw}, sub { $_[0]->rotate(-90, Y) });
-        EVT_BUTTON($self, $self->{btn_rotateY90ccw}, sub { $_[0]->rotate(90, Y) });
-        EVT_BUTTON($self, $self->{btn_rotateZ90cw}, sub { $_[0]->rotate(-90, Z) });
-        EVT_BUTTON($self, $self->{btn_rotateZ90ccw}, sub { $_[0]->rotate(90, Z) });
+        if ($Slic3r::GUI::Settings->{_}{extended_context_toolbar}){
+            EVT_BUTTON($self, $self->{btn_rotateX90cw}, sub { $_[0]->rotate(-90, X) });
+            EVT_BUTTON($self, $self->{btn_rotateX90ccw}, sub { $_[0]->rotate(90, X) });
+            EVT_BUTTON($self, $self->{btn_rotateY90cw}, sub { $_[0]->rotate(-90, Y) });
+            EVT_BUTTON($self, $self->{btn_rotateY90ccw}, sub { $_[0]->rotate(90, Y) });
+            EVT_BUTTON($self, $self->{btn_rotateZ90cw}, sub { $_[0]->rotate(-90, Z) });
+            EVT_BUTTON($self, $self->{btn_rotateZ90ccw}, sub { $_[0]->rotate(90, Z) });
+        }
         EVT_BUTTON($self, $self->{btn_rotate45cw}, sub { $_[0]->rotate(-45, Z) });
         EVT_BUTTON($self, $self->{btn_rotate45ccw}, sub { $_[0]->rotate(45, Z) });
         EVT_BUTTON($self, $self->{btn_changescale}, sub { $self->changescale(undef); });
@@ -602,21 +619,21 @@ sub _on_change_combobox {
 }
 
 sub _on_select_preset {
-	my ($self, $group) = @_;
-	
-	my @presets = $self->selected_presets($group);
-	
-	my $s_presets = $Slic3r::GUI::Settings->{presets};
-	my $changed = !$s_presets->{$group} || $s_presets->{$group} ne $presets[0]->name;
+    my ($self, $group) = @_;
+    
+    my @presets = $self->selected_presets($group);
+    
+    my $s_presets = $Slic3r::GUI::Settings->{presets};
+    my $changed = !$s_presets->{$group} || $s_presets->{$group} ne $presets[0]->name;
     $s_presets->{$group} = $presets[0]->name;
     $s_presets->{"${group}_${_}"} = $presets[$_]->name for 1..$#presets;
-	
-	wxTheApp->save_settings;
-	
-	# Ignore overrides in the plater, we only care about the preset configs.
-	my $config = $self->config(1);
-	
-	$self->on_extruders_change(scalar @{$config->get('nozzle_diameter')});
+    
+    wxTheApp->save_settings;
+    
+    # Ignore overrides in the plater, we only care about the preset configs.
+    my $config = $self->config(1);
+    
+    $self->on_extruders_change(scalar @{$config->get('nozzle_diameter')});
     
     if ($group eq 'print') {
         my $o_config = $self->{settings_override_config};
@@ -1393,9 +1410,9 @@ sub config_changed {
     
     # Apply changes to the plater-specific config options.
     foreach my $opt_key (@{$self->{config}->diff($config)}) {
-	    # Ignore overrides. No need to set them in our config; we'll use them directly below.
-	    next if $opt_key eq 'overrides';
-	    
+        # Ignore overrides. No need to set them in our config; we'll use them directly below.
+        next if $opt_key eq 'overrides';
+        
         $self->{config}->set($opt_key, $config->get($opt_key));
         
         if ($opt_key eq 'bed_shape') {
@@ -2156,21 +2173,21 @@ sub object_cut_dialog {
     }
     
     my $dlg = Slic3r::GUI::Plater::ObjectCutDialog->new($self,
-		object              => $self->{objects}[$obj_idx],
-		model_object        => $self->{model}->objects->[$obj_idx],
-	);
-	return unless $dlg->ShowModal == wxID_OK;
-	
-	if (my @new_objects = $dlg->NewModelObjects) {
-	    my $process_dialog = Wx::ProgressDialog->new('Loading…', "Loading new objects…", 100, $self, 0);
+        object              => $self->{objects}[$obj_idx],
+        model_object        => $self->{model}->objects->[$obj_idx],
+    );
+    return unless $dlg->ShowModal == wxID_OK;
+    
+    if (my @new_objects = $dlg->NewModelObjects) {
+        my $process_dialog = Wx::ProgressDialog->new('Loading…', "Loading new objects…", 100, $self, 0);
         $process_dialog->Pulse;
         
-	    $self->remove($obj_idx);
-	    $self->load_model_objects(grep defined($_), @new_objects);
-	    $self->arrange if @new_objects <= 2; # don't arrange for grid cuts
-	    
-	    $process_dialog->Destroy;
-	}
+        $self->remove($obj_idx);
+        $self->load_model_objects(grep defined($_), @new_objects);
+        $self->arrange if @new_objects <= 2; # don't arrange for grid cuts
+        
+        $process_dialog->Destroy;
+    }
 }
 
 sub object_settings_dialog {
@@ -2188,22 +2205,22 @@ sub object_settings_dialog {
     return unless $self->validate_config;
     
     my $dlg = Slic3r::GUI::Plater::ObjectSettingsDialog->new($self,
-		object          => $self->{objects}[$obj_idx],
-		model_object    => $model_object,
-	);
-	$self->pause_background_process;
-	$dlg->ShowModal;
-	
+        object          => $self->{objects}[$obj_idx],
+        model_object    => $model_object,
+    );
+    $self->pause_background_process;
+    $dlg->ShowModal;
+    
     # update thumbnail since parts may have changed
     if ($dlg->PartsChanged) {
-	    # recenter and re-align to Z = 0
-	    $model_object->center_around_origin;
+        # recenter and re-align to Z = 0
+        $model_object->center_around_origin;
         $self->make_thumbnail($obj_idx);
     }
-	
-	# update print
-	if ($dlg->PartsChanged || $dlg->PartSettingsChanged) {
-	    $self->stop_background_process;
+    
+    # update print
+    if ($dlg->PartsChanged || $dlg->PartSettingsChanged) {
+        $self->stop_background_process;
         $self->{print}->reload_object($obj_idx);
         $self->on_model_change;
     } else {
@@ -2279,7 +2296,7 @@ sub selection_changed {
                     $self->{object_info_manifold_warning_icon}->Show;
                     
                     # we don't show normals_fixed because we never provide normals
-	                # to admesh, so it generates normals for all facets
+                    # to admesh, so it generates normals for all facets
                     my $message = sprintf '%d degenerate facets, %d edges fixed, %d facets removed, %d facets added, %d facets reversed, %d backwards edges',
                         @$stats{qw(degenerate_facets edges_fixed facets_removed facets_added facets_reversed backwards_edges)};
                     $self->{object_info_manifold}->SetToolTipString($message);
