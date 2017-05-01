@@ -2443,12 +2443,6 @@ sub object_menu {
     wxTheApp->append_menu_item($menu, "Move to bed center", 'Center object around bed center', sub {
         $self->center_selected_object_on_bed;
     }, undef, 'arrow_in.png');
-    wxTheApp->append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
-        $self->rotate(-45);
-    }, undef, 'arrow_rotate_z_clockwise.png');
-    wxTheApp->append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
-        $self->rotate(+45);
-    }, undef, 'arrow_rotate_z_anticlockwise.png');
     
     {
         my $rotateMenu = Wx::Menu->new;
