@@ -179,7 +179,7 @@ sub new {
             $self->{htoolbar}->AddTool(TB_Z90CCW, "90° Z ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
             $self->{htoolbar}->AddTool(TB_Z90CW, "90° Z cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
         } 
-		
+        
         $self->{htoolbar}->AddTool(TB_45CCW, "45° ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_45CW, "45° cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
         
