@@ -2392,50 +2392,50 @@ sub object_menu {
     $menu->AppendSeparator();
 
     if ($Slic3r::GUI::Settings->{_}{extended_context}){
-        $frame->_append_menu_item($menu, "Rotate 90° clockwise (X)", 'Rotate the selected object by 90° clockwise', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 90° clockwise (X)", 'Rotate the selected object by 90° clockwise', sub {
             $self->rotate(-90, X);
         }, undef, 'arrow_rotate_x_clockwise.png');
-        $frame->_append_menu_item($menu, "Rotate 90° counter-clockwise (X)", 'Rotate the selected object by 90° counter-clockwise', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 90° counter-clockwise (X)", 'Rotate the selected object by 90° counter-clockwise', sub {
             $self->rotate(90, X);
         }, undef, 'arrow_rotate_x_anticlockwise.png');
-        $frame->_append_menu_item($menu, "Rotate 180° (X)", 'Rotate the selected object by 180°', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 180° (X)", 'Rotate the selected object by 180°', sub {
             $self->rotate(180, X);
         }, undef, 'arrow_rotate_x_anticlockwise.png');
 
         $menu->AppendSeparator();
         
-        $frame->_append_menu_item($menu, "Rotate 90° clockwise (Y)", 'Rotate the selected object by 90° clockwise', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 90° clockwise (Y)", 'Rotate the selected object by 90° clockwise', sub {
             $self->rotate(-90, Y);
         }, undef, 'arrow_rotate_y_clockwise.png');
-        $frame->_append_menu_item($menu, "Rotate 90° counter-clockwise (Y)", 'Rotate the selected object by 90° counter-clockwise', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 90° counter-clockwise (Y)", 'Rotate the selected object by 90° counter-clockwise', sub {
             $self->rotate(90, Y);
         }, undef, 'arrow_rotate_y_anticlockwise.png');
-        $frame->_append_menu_item($menu, "Rotate 180° (Y)", 'Rotate the selected object by 180°', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 180° (Y)", 'Rotate the selected object by 180°', sub {
             $self->rotate(180, Y);
         }, undef, 'arrow_rotate_y_anticlockwise.png');
         $menu->AppendSeparator();
         
-        $frame->_append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
             $self->rotate(-45, Z);
         }, undef, 'arrow_rotate_z_clockwise.png');
-        $frame->_append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
             $self->rotate(+45, Z);
         }, undef, 'arrow_rotate_z_anticlockwise.png');
-        $frame->_append_menu_item($menu, "Rotate 90° clockwise (Z)", 'Rotate the selected object by 90° clockwise', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 90° clockwise (Z)", 'Rotate the selected object by 90° clockwise', sub {
             $self->rotate(-90, Z);
         }, undef, 'arrow_rotate_z_clockwise.png');
-        $frame->_append_menu_item($menu, "Rotate 90° counter-clockwise (Z)", 'Rotate the selected object by 90° counter-clockwise', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 90° counter-clockwise (Z)", 'Rotate the selected object by 90° counter-clockwise', sub {
             $self->rotate(90, Z);
         }, undef, 'arrow_rotate_z_anticlockwise.png');
-        $frame->_append_menu_item($menu, "Rotate 180° (Z)", 'Rotate the selected object by 180°', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 180° (Z)", 'Rotate the selected object by 180°', sub {
             $self->rotate(180, Z);
         }, undef, 'arrow_rotate_z_anticlockwise.png');
         $menu->AppendSeparator();
     } else {    
-        $frame->_append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
             $self->rotate(-45, Z);
         }, undef, 'arrow_rotate_z_clockwise.png');
-        $frame->_append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
+        wxTheApp->append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
             $self->rotate(+45, Z);
         }, undef, 'arrow_rotate_z_anticlockwise.png');
     }
@@ -2445,10 +2445,10 @@ sub object_menu {
     }, undef, 'arrow_in.png');
     wxTheApp->append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
         $self->rotate(-45);
-    }, undef, 'arrow_rotate_clockwise.png');
+    }, undef, 'arrow_rotate_z_clockwise.png');
     wxTheApp->append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
         $self->rotate(+45);
-    }, undef, 'arrow_rotate_anticlockwise.png');
+    }, undef, 'arrow_rotate_z_anticlockwise.png');
     
     {
         my $rotateMenu = Wx::Menu->new;
