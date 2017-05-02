@@ -78,6 +78,13 @@ sub new {
         tooltip     => 'If this is enabled, the Extended Context Menu will become accessible.',
         default     => $Slic3r::GUI::Settings->{_}{extended_context}  // 0,
     ));
+    $optgroup->append_single_option_line(Slic3r::GUI::OptionsGroup::Option->new(
+        opt_id      => 'extended_context_toolbar',
+        type        => 'bool',
+        label       => 'Extended Toolbar',
+        tooltip     => 'If this is enabled, the Extended Toolbar will become accessible (restart of Slic3r required).',
+        default     => $Slic3r::GUI::Settings->{_}{extended_context_toolbar}  // 0,
+    ));
     
     my $sizer = Wx::BoxSizer->new(wxVERTICAL);
     $sizer->Add($optgroup->sizer, 0, wxEXPAND | wxBOTTOM | wxLEFT | wxRIGHT, 10);
