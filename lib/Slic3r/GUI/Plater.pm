@@ -170,6 +170,11 @@ sub new {
         $self->{htoolbar}->AddTool(TB_MORE, "More", Wx::Bitmap->new($Slic3r::var->("add.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_FEWER, "Fewer", Wx::Bitmap->new($Slic3r::var->("delete.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddSeparator;
+<<<<<<< HEAD
+=======
+
+        
+>>>>>>> 7eba8c2635dd6049595f3d7c548f261691ee038a
         if ($Slic3r::GUI::Settings->{_}{extended_context_toolbar}) {
             $self->{htoolbar}->AddTool(TB_X90CCW, "90° X ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
             $self->{htoolbar}->AddTool(TB_X90CW, "90° X cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_clockwise.png"), wxBITMAP_TYPE_PNG), '');
@@ -178,8 +183,13 @@ sub new {
             $self->{htoolbar}->AddTool(TB_Z90CCW, "90° Z ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
             $self->{htoolbar}->AddTool(TB_Z90CW, "90° Z cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
         } 
+<<<<<<< HEAD
+=======
+        
+>>>>>>> 7eba8c2635dd6049595f3d7c548f261691ee038a
         $self->{htoolbar}->AddTool(TB_45CCW, "45° ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_45CW, "45° cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+       
         $self->{htoolbar}->AddSeparator;
         $self->{htoolbar}->AddTool(TB_SCALE, "Scale…", Wx::Bitmap->new($Slic3r::var->("arrow_out.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_SPLIT, "Split", Wx::Bitmap->new($Slic3r::var->("shape_ungroup.png"), wxBITMAP_TYPE_PNG), '');
@@ -228,6 +238,10 @@ sub new {
             settings        => "Settings, Parts, Modifiers and Layers",
         );
         $self->{btoolbar} = Wx::BoxSizer->new(wxHORIZONTAL);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7eba8c2635dd6049595f3d7c548f261691ee038a
         if ($Slic3r::GUI::Settings->{_}{extended_context_toolbar}){
             for (qw(add remove reset arrange increase decrease rotateX90ccw rotateX90cw rotateY90ccw rotateY90cw rotateZ90ccw rotateZ90cw rotate45ccw rotate45cw changescale split cut settings)) {
                 $self->{"btn_$_"} = Wx::Button->new($self, -1, $tbar_buttons{$_}, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
@@ -2428,7 +2442,11 @@ sub object_menu {
             $self->rotate(180, Y);
         }, undef, 'arrow_rotate_y_anticlockwise.png');
         $menu->AppendSeparator();
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 7eba8c2635dd6049595f3d7c548f261691ee038a
         wxTheApp->append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
             $self->rotate(-45, Z);
         }, undef, 'arrow_rotate_z_clockwise.png');
