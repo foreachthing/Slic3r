@@ -170,12 +170,14 @@ sub new {
         $self->{htoolbar}->AddTool(TB_MORE, "More", Wx::Bitmap->new($Slic3r::var->("add.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_FEWER, "Fewer", Wx::Bitmap->new($Slic3r::var->("delete.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddSeparator;
-        $self->{htoolbar}->AddTool(TB_X90CCW, "90° X ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_X90CW, "90° X cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_clockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_Y90CCW, "90° Y ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_Y90CW, "90° Y cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_clockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_Z90CCW, "90° Z ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
-        $self->{htoolbar}->AddTool(TB_Z90CW, "90° Z cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+        if ($Slic3r::GUI::Settings->{_}{extended_context_toolbar}) {
+            $self->{htoolbar}->AddTool(TB_X90CCW, "90° X ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
+            $self->{htoolbar}->AddTool(TB_X90CW, "90° X cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_x_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+            $self->{htoolbar}->AddTool(TB_Y90CCW, "90° Y ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
+            $self->{htoolbar}->AddTool(TB_Y90CW, "90° Y cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_y_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+            $self->{htoolbar}->AddTool(TB_Z90CCW, "90° Z ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
+            $self->{htoolbar}->AddTool(TB_Z90CW, "90° Z cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
+        } 
         $self->{htoolbar}->AddTool(TB_45CCW, "45° ccw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_anticlockwise.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddTool(TB_45CW, "45° cw", Wx::Bitmap->new($Slic3r::var->("arrow_rotate_z_clockwise.png"), wxBITMAP_TYPE_PNG), '');
         $self->{htoolbar}->AddSeparator;
@@ -226,10 +228,18 @@ sub new {
             settings        => "Settings, Parts, Modifiers and Layers",
         );
         $self->{btoolbar} = Wx::BoxSizer->new(wxHORIZONTAL);
-        for (qw(add remove reset arrange increase decrease rotateX90ccw rotateX90cw rotateY90ccw rotateY90cw rotateZ90ccw rotateZ90cw rotate45ccw rotate45cw changescale split cut settings)) {
-            $self->{"btn_$_"} = Wx::Button->new($self, -1, $tbar_buttons{$_}, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-            $self->{btoolbar}->Add($self->{"btn_$_"});
-            $self->{"btn_$_"}->SetToolTipString($tbar_buttonsToolTip{$_});
+        if ($Slic3r::GUI::Settings->{_}{extended_context_toolbar}){
+            for (qw(add remove reset arrange increase decrease rotateX90ccw rotateX90cw rotateY90ccw rotateY90cw rotateZ90ccw rotateZ90cw rotate45ccw rotate45cw changescale split cut settings)) {
+                $self->{"btn_$_"} = Wx::Button->new($self, -1, $tbar_buttons{$_}, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+                $self->{btoolbar}->Add($self->{"btn_$_"});
+                $self->{"btn_$_"}->SetToolTipString($tbar_buttonsToolTip{$_});
+            }
+        } else {
+            for (qw(add remove reset arrange increase decrease rotate45ccw rotate45cw changescale split cut settings)) {
+                $self->{"btn_$_"} = Wx::Button->new($self, -1, $tbar_buttons{$_}, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+                $self->{btoolbar}->Add($self->{"btn_$_"});
+                $self->{"btn_$_"}->SetToolTipString($tbar_buttonsToolTip{$_});
+            }
         }
     }
 
@@ -300,12 +310,14 @@ sub new {
         EVT_TOOL($self, TB_ARRANGE, sub { $self->arrange; });
         EVT_TOOL($self, TB_MORE, sub { $self->increase; });
         EVT_TOOL($self, TB_FEWER, sub { $self->decrease; });
-        EVT_TOOL($self, TB_X90CW, sub { $_[0]->rotate(-90, X) });
-        EVT_TOOL($self, TB_X90CCW, sub { $_[0]->rotate(90, X) });
-        EVT_TOOL($self, TB_Y90CW, sub { $_[0]->rotate(-90, Y) });
-        EVT_TOOL($self, TB_Y90CCW, sub { $_[0]->rotate(90, Y) });
-        EVT_TOOL($self, TB_Z90CW, sub { $_[0]->rotate(-90, Z) });
-        EVT_TOOL($self, TB_Z90CCW, sub { $_[0]->rotate(90, Z) });
+        if ($Slic3r::GUI::Settings->{_}{extended_context_toolbar}){
+            EVT_TOOL($self, TB_X90CW, sub { $_[0]->rotate(-90, X) });
+            EVT_TOOL($self, TB_X90CCW, sub { $_[0]->rotate(90, X) });
+            EVT_TOOL($self, TB_Y90CW, sub { $_[0]->rotate(-90, Y) });
+            EVT_TOOL($self, TB_Y90CCW, sub { $_[0]->rotate(90, Y) });
+            EVT_TOOL($self, TB_Z90CW, sub { $_[0]->rotate(-90, Z) });
+            EVT_TOOL($self, TB_Z90CCW, sub { $_[0]->rotate(90, Z) });
+        }
         EVT_TOOL($self, TB_45CW, sub { $_[0]->rotate(-45, Z) });
         EVT_TOOL($self, TB_45CCW, sub { $_[0]->rotate(45, Z) });
         EVT_TOOL($self, TB_SCALE, sub { $self->changescale(undef); });
@@ -319,12 +331,14 @@ sub new {
         EVT_BUTTON($self, $self->{btn_arrange}, sub { $self->arrange; });
         EVT_BUTTON($self, $self->{btn_increase}, sub { $self->increase; });
         EVT_BUTTON($self, $self->{btn_decrease}, sub { $self->decrease; });
-        EVT_BUTTON($self, $self->{btn_rotateX90cw}, sub { $_[0]->rotate(-90, X) });
-        EVT_BUTTON($self, $self->{btn_rotateX90ccw}, sub { $_[0]->rotate(90, X) });
-        EVT_BUTTON($self, $self->{btn_rotateY90cw}, sub { $_[0]->rotate(-90, Y) });
-        EVT_BUTTON($self, $self->{btn_rotateY90ccw}, sub { $_[0]->rotate(90, Y) });
-        EVT_BUTTON($self, $self->{btn_rotateZ90cw}, sub { $_[0]->rotate(-90, Z) });
-        EVT_BUTTON($self, $self->{btn_rotateZ90ccw}, sub { $_[0]->rotate(90, Z) });
+        if ($Slic3r::GUI::Settings->{_}{extended_context_toolbar}){
+            EVT_BUTTON($self, $self->{btn_rotateX90cw}, sub { $_[0]->rotate(-90, X) });
+            EVT_BUTTON($self, $self->{btn_rotateX90ccw}, sub { $_[0]->rotate(90, X) });
+            EVT_BUTTON($self, $self->{btn_rotateY90cw}, sub { $_[0]->rotate(-90, Y) });
+            EVT_BUTTON($self, $self->{btn_rotateY90ccw}, sub { $_[0]->rotate(90, Y) });
+            EVT_BUTTON($self, $self->{btn_rotateZ90cw}, sub { $_[0]->rotate(-90, Z) });
+            EVT_BUTTON($self, $self->{btn_rotateZ90ccw}, sub { $_[0]->rotate(90, Z) });
+        }
         EVT_BUTTON($self, $self->{btn_rotate45cw}, sub { $_[0]->rotate(-45, Z) });
         EVT_BUTTON($self, $self->{btn_rotate45ccw}, sub { $_[0]->rotate(45, Z) });
         EVT_BUTTON($self, $self->{btn_changescale}, sub { $self->changescale(undef); });
@@ -2229,9 +2243,6 @@ sub object_list_changed {
         $self->{htoolbar}->EnableTool($_, $have_objects)
             for (TB_RESET, TB_ARRANGE);
     }
-    
-    # prepagate the event to the frame (a custom Wx event would be cleaner)
-    $self->GetFrame->on_plater_object_list_changed($have_objects);
 }
 
 sub selection_changed {
@@ -2404,6 +2415,7 @@ sub object_menu {
         wxTheApp->append_menu_item($menu, "Rotate 180° (X)", 'Rotate the selected object by 180°', sub {
             $self->rotate(180, X);
         }, undef, 'arrow_rotate_x_anticlockwise.png');
+
         $menu->AppendSeparator();
         
         wxTheApp->append_menu_item($menu, "Rotate 90° clockwise (Y)", 'Rotate the selected object by 90° clockwise', sub {
@@ -2442,73 +2454,9 @@ sub object_menu {
         }, undef, 'arrow_rotate_z_anticlockwise.png');
     }
 
-    my $rotateMenu = Wx::Menu->new;
-    my $rotateMenuItem = $menu->AppendSubMenu($rotateMenu, "Rotate", 'Rotate the selected object by an arbitrary angle');
-    wxTheApp->set_menu_item_icon($rotateMenuItem, 'textfield.png');
-    wxTheApp->append_menu_item($rotateMenu, "Around X axis…", 'Rotate the selected object by an arbitrary angle around X axis', sub {
-        $self->rotate(undef, X);
-    }, undef, 'bullet_red.png');
-    wxTheApp->append_menu_item($rotateMenu, "Around Y axis…", 'Rotate the selected object by an arbitrary angle around Y axis', sub {
-        $self->rotate(undef, Y);
-    }, undef, 'bullet_green.png');
-    wxTheApp->append_menu_item($rotateMenu, "Around Z axis…", 'Rotate the selected object by an arbitrary angle around Z axis', sub {
-        $self->rotate(undef, Z);
-    }, undef, 'bullet_blue.png');
-    
-    my $mirrorMenu = Wx::Menu->new;
-    my $mirrorMenuItem = $menu->AppendSubMenu($mirrorMenu, "Mirror", 'Mirror the selected object');
-    wxTheApp->set_menu_item_icon($mirrorMenuItem, 'shape_flip_horizontal.png');
-    wxTheApp->append_menu_item($mirrorMenu, "Along X axis…", 'Mirror the selected object along the X axis', sub {
-        $self->mirror(X);
-    }, undef, 'bullet_red.png');
-    wxTheApp->append_menu_item($mirrorMenu, "Along Y axis…", 'Mirror the selected object along the Y axis', sub {
-        $self->mirror(Y);
-    }, undef, 'bullet_green.png');
-    wxTheApp->append_menu_item($mirrorMenu, "Along Z axis…", 'Mirror the selected object along the Z axis', sub {
-        $self->mirror(Z);
-    }, undef, 'bullet_blue.png');
-    
-    my $scaleMenu = Wx::Menu->new;
-    my $scaleMenuItem = $menu->AppendSubMenu($scaleMenu, "Scale", 'Scale the selected object along a single axis');
-    wxTheApp->set_menu_item_icon($scaleMenuItem, 'arrow_out.png');
-    wxTheApp->append_menu_item($scaleMenu, "Uniformly…", 'Scale the selected object along the XYZ axes', sub {
-        $self->changescale(undef);
-    });
-    wxTheApp->append_menu_item($scaleMenu, "Along X axis…", 'Scale the selected object along the X axis', sub {
-        $self->changescale(X);
-    }, undef, 'bullet_red.png');
-    wxTheApp->append_menu_item($scaleMenu, "Along Y axis…", 'Scale the selected object along the Y axis', sub {
-        $self->changescale(Y);
-    }, undef, 'bullet_green.png');
-    wxTheApp->append_menu_item($scaleMenu, "Along Z axis…", 'Scale the selected object along the Z axis', sub {
-        $self->changescale(Z);
-    }, undef, 'bullet_blue.png');
-    
-    my $scaleToSizeMenu = Wx::Menu->new;
-    my $scaleToSizeMenuItem = $menu->AppendSubMenu($scaleToSizeMenu, "Scale to size", 'Scale the selected object along a single axis');
-    wxTheApp->set_menu_item_icon($scaleToSizeMenuItem, 'arrow_out.png');
-    wxTheApp->append_menu_item($scaleToSizeMenu, "Uniformly…", 'Scale the selected object along the XYZ axes', sub {
-        $self->changescale(undef, 1);
-    });
-    wxTheApp->append_menu_item($scaleToSizeMenu, "Along X axis…", 'Scale the selected object along the X axis', sub {
-        $self->changescale(X, 1);
-    }, undef, 'bullet_red.png');
-    wxTheApp->append_menu_item($scaleToSizeMenu, "Along Y axis…", 'Scale the selected object along the Y axis', sub {
-        $self->changescale(Y, 1);
-    }, undef, 'bullet_green.png');
-    wxTheApp->append_menu_item($scaleToSizeMenu, "Along Z axis…", 'Scale the selected object along the Z axis', sub {
-        $self->changescale(Z, 1);
-    }, undef, 'bullet_blue.png');
-    
     wxTheApp->append_menu_item($menu, "Move to bed center", 'Center object around bed center', sub {
         $self->center_selected_object_on_bed;
     }, undef, 'arrow_in.png');
-    wxTheApp->append_menu_item($menu, "Rotate 45° clockwise", 'Rotate the selected object by 45° clockwise', sub {
-        $self->rotate(-45);
-    }, undef, 'arrow_rotate_clockwise.png');
-    wxTheApp->append_menu_item($menu, "Rotate 45° counter-clockwise", 'Rotate the selected object by 45° counter-clockwise', sub {
-        $self->rotate(+45);
-    }, undef, 'arrow_rotate_anticlockwise.png');
     
     {
         my $rotateMenu = Wx::Menu->new;
