@@ -443,6 +443,7 @@ sub options {
         infill_overlap bridge_flow_ratio
         xy_size_compensation resolution overridable compatible_printers
         print_settings_id
+        duplicate_distance
     )
 }
 
@@ -662,6 +663,7 @@ sub build {
             my $optgroup = $page->new_optgroup('Other');
             $optgroup->append_single_option_line('xy_size_compensation');
             $optgroup->append_single_option_line('resolution');
+            $optgroup->append_single_option_line('duplicate_distance');
         }
     }
     
