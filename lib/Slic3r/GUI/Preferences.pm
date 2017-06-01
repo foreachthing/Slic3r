@@ -72,6 +72,13 @@ sub new {
         default     => $Slic3r::GUI::Settings->{_}{no_controller},
     ));
     $optgroup->append_single_option_line(Slic3r::GUI::OptionsGroup::Option->new(
+        opt_id      => 'tabbed_preset_editors',
+        type        => 'bool',
+        label       => 'Display profile editors as tabs',
+        tooltip     => 'When opening a profile editor, it will be shown in a dialog or in a tab according to this option.',
+        default     => $Slic3r::GUI::Settings->{_}{tabbed_preset_editors},
+    ));
+    $optgroup->append_single_option_line(Slic3r::GUI::OptionsGroup::Option->new(
         opt_id      => 'extended_context',
         type        => 'bool',
         label       => 'Extended Context Menu',

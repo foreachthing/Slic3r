@@ -87,7 +87,7 @@ sub new {
     });
     
     EVT_CHOICE($parent, $self->{presets_choice}, sub {
-        $self->on_select_preset;
+        $self->_on_select_preset;
     });
     
     EVT_BUTTON($self, $self->{btn_save_preset}, sub { $self->save_preset });
@@ -123,7 +123,7 @@ sub save_preset {
     $self->{treectrl}->SetFocus;
     
     my $preset = $self->current_preset;
-    $preset->save(undef, $self);
+    $preset->save_prompt($self);
     $self->load_presets;
     $self->select_preset_by_name($preset->name);
     
@@ -155,7 +155,7 @@ sub select_preset {
     my ($self, $i, $force) = @_;
     
     $self->{presets_choice}->SetSelection($i);
-    $self->on_select_preset($force);
+    $self->_on_select_preset($force);
 }
 
 sub select_preset_by_name {
@@ -164,7 +164,7 @@ sub select_preset_by_name {
     my $presets = wxTheApp->presets->{$self->name};
     my $i = first { $presets->[$_]->name eq $name } 0..$#$presets;
     $self->{presets_choice}->SetSelection($i);
-    $self->on_select_preset($force);
+    $self->_on_select_preset($force);
 }
 
 sub prompt_unsaved_changes {
@@ -175,6 +175,11 @@ sub prompt_unsaved_changes {
 }
 
 sub on_select_preset {
+    my ($self, $cb) = @_;
+    $self->{on_select_preset} = $cb;
+}
+
+sub _on_select_preset {
     my ($self, $force) = @_;
     
     # This method is called:
@@ -221,6 +226,8 @@ sub on_select_preset {
         $@ = "I was unable to load the selected config file: $@";
         Slic3r::GUI::catch_error($self);
     }
+    
+    $self->{on_select_preset}->($self->name, $preset) if $self->{on_select_preset};
 }
 
 sub add_options_page {
@@ -441,7 +448,7 @@ sub options {
         external_perimeter_extrusion_width infill_extrusion_width solid_infill_extrusion_width 
         top_infill_extrusion_width support_material_extrusion_width
         infill_overlap bridge_flow_ratio
-        xy_size_compensation resolution overridable compatible_printers
+        xy_size_compensation resolution shortcuts compatible_printers
         print_settings_id
         duplicate_distance
     )
@@ -450,7 +457,7 @@ sub options {
 sub build {
     my $self = shift;
     
-    my $overridable_widget = sub {
+    my $shortcuts_widget = sub {
         my ($parent) = @_;
         
         my $Options = $Slic3r::Config::Options;
@@ -459,15 +466,15 @@ sub build {
                 grep { exists $Options->{$_} && $Options->{$_}{category} } $self->options
         );
         my @opt_keys = sort { $options{$a} cmp $options{$b} } keys %options;
-        $self->{overridable_opt_keys} = [ @opt_keys ];
+        $self->{shortcuts_opt_keys} = [ @opt_keys ];
         
-        my $listbox = $self->{overridable_list} = Wx::CheckListBox->new($parent, -1,
+        my $listbox = $self->{shortcuts_list} = Wx::CheckListBox->new($parent, -1,
             wxDefaultPosition, [-1, 320], [ map $options{$_}, @opt_keys ]);
         
         EVT_CHECKLISTBOX($self, $listbox, sub {
             my $value = [ map $opt_keys[$_], grep $listbox->IsChecked($_), 0..$#opt_keys ];
-            $self->config->set('overridable', $value);
-            $self->_on_value_change('overridable');
+            $self->config->set('shortcuts', $value);
+            $self->_on_value_change('shortcuts');
         });
         
         my $sizer = Wx::BoxSizer->new(wxVERTICAL);
@@ -718,7 +725,7 @@ sub build {
     }
     
     {
-        my $page = $self->add_options_page('Overrides', 'wrench.png');
+        my $page = $self->add_options_page('Shortcuts', 'wrench.png');
         {
             my $optgroup = $page->new_optgroup('Profile preferences');
             {
@@ -730,10 +737,10 @@ sub build {
             }
         }
         {
-            my $optgroup = $page->new_optgroup('Overridable settings (they will be displayed in the plater for quick changes)');
+            my $optgroup = $page->new_optgroup('Show shortcuts for the following settings');
             {
                 my $line = Slic3r::GUI::OptionsGroup::Line->new(
-                    widget      => $overridable_widget,
+                    widget      => $shortcuts_widget,
                     full_width  => 1,
                 );
                 $optgroup->append_line($line);
@@ -748,9 +755,9 @@ sub reload_config {
     $self->_reload_compatible_printers_widget;
     
     {
-        my %overridable = map { $_ => 1 } @{ $self->config->get('overridable') };
-        for my $i (0..$#{$self->{overridable_opt_keys}}) {
-            $self->{overridable_list}->Check($i, $overridable{ $self->{overridable_opt_keys}[$i] });
+        my %shortcuts = map { $_ => 1 } @{ $self->config->get('shortcuts') };
+        for my $i (0..$#{$self->{shortcuts_opt_keys}}) {
+            $self->{shortcuts_list}->Check($i, $shortcuts{ $self->{shortcuts_opt_keys}[$i] });
         }
     }
     
@@ -1605,10 +1612,11 @@ sub new {
     $self->{title}      = $title;
     $self->{iconID}     = $iconID;
     
-    $self->SetScrollbars(1, 1, 1, 1);
-    
     $self->{vsizer} = Wx::BoxSizer->new(wxVERTICAL);
     $self->SetSizer($self->{vsizer});
+    
+    # http://docs.wxwidgets.org/3.0/classwx_scrolled.html#details
+    $self->SetScrollRate($Slic3r::GUI::scroll_step, $Slic3r::GUI::scroll_step);
     
     return $self;
 }
