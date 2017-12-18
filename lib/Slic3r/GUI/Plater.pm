@@ -255,7 +255,7 @@ sub new {
             changescale     => "Change Scale of Object",
             split           => "Split Object",
             cut             => "Cut Object",
-            layers          => "Set Layer heights…",
+            layers          => "Set variable Layer heights…",
             settings        => "Settings, Parts, Modifiers and Layers",
         );
         $self->{btoolbar} = Wx::BoxSizer->new(wxHORIZONTAL);
@@ -311,7 +311,7 @@ sub new {
             changescale     arrow_out.png
             split           shape_ungroup.png
             cut             package.png
-            layers          cog.png
+            layers          variable_layer_height.png
             settings        cog.png
         );
         for (grep $self->{"btn_$_"}, keys %icons) {
@@ -2777,7 +2777,7 @@ sub object_settings_dialog {
         $self->make_thumbnail($obj_idx);
     }
     
-    # update print
+    # update print
     if ($dlg->PartsChanged || $dlg->PartSettingsChanged) {
         $self->stop_background_process;
         $self->{print}->reload_object($obj_idx);
