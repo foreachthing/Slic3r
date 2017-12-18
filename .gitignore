@@ -18,4 +18,3 @@ package/osx/Slic3r*.app
 *.swo
 GIT-Pull.bat
 GIT-Pull-BUILD.bat
-Start SLIC3R.bat
