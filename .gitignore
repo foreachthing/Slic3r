@@ -16,3 +16,6 @@ package/osx/Slic3r*.app
 *.dmg
 *.swp
 *.swo
+GIT-Pull.bat
+GIT-Pull-BUILD.bat
+Start SLIC3R.bat

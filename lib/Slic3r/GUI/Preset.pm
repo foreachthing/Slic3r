@@ -140,6 +140,9 @@ sub save_as {
         $self->_config->clear;
         $self->_config->apply($self->_dirty_config);
     }
+    
+    # unlink the file first to avoid problems on case-insensitive file systems
+    unlink Slic3r::encode_path($self->file);
     $self->_config->save($self->file);
     wxTheApp->load_presets;
     
@@ -180,7 +183,7 @@ sub dirty_config {
 sub load_config {
     my ($self) = @_;
     
-    return if $self->_loaded;
+    return $self->_config if $self->_loaded;
     
     my @keys = $self->_group_class->options;
     my @extra_keys = $self->_group_class->overriding_options;
