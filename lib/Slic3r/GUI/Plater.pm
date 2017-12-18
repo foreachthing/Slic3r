@@ -273,6 +273,7 @@ sub new {
                 $self->{"btn_$_"}->SetToolTipString($tbar_buttonsToolTip{$_});
             }
         }
+    }
 
     # right pane buttons
     $self->{btn_export_gcode} = Wx::Button->new($self, -1, "Export G-code…", wxDefaultPosition, [-1, 30], wxBU_LEFT);
