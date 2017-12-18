@@ -3093,7 +3093,7 @@ sub object_menu {
     }, undef, 'package.png');
     wxTheApp->append_menu_item($menu, "Layer heights…", 'Open the dynamic layer height control', sub {
         $self->object_layers_dialog;
-    }, undef, 'cog.png');
+    }, undef, 'variable_layer_height.png');
     $menu->AppendSeparator();
     wxTheApp->append_menu_item($menu, "Settings…", 'Open the object editor dialog', sub {
         $self->object_settings_dialog;
