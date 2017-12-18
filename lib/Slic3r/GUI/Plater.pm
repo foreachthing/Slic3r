@@ -255,6 +255,7 @@ sub new {
             changescale     => "Change Scale of Object",
             split           => "Split Object",
             cut             => "Cut Object",
+            layers          => "Set Layer heights…",
             settings        => "Settings, Parts, Modifiers and Layers",
         );
         $self->{btoolbar} = Wx::BoxSizer->new(wxHORIZONTAL);
