@@ -1,5 +1,6 @@
 ### This is a FORK!
 I use this for my extended context menu and menu bar.
+[See here...](https://github.com/foreachthing/Slic3r/wiki/ExtendedContext)
 
 ### Back to Slic3r
 
