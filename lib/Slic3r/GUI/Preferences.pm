@@ -92,14 +92,14 @@ sub new {
         tooltip     => 'When opening a profile editor, it will be shown in a dialog or in a tab according to this option.',
         default     => $Slic3r::GUI::Settings->{_}{tabbed_preset_editors},
     ));
-    $optgroup->append_single_option_line(Slic3r::GUI::OptionsGroup::Option->new(
+    $optgroup->append_single_option_line(Slic3r::GUI::OptionsGroup::Option->new(    # extended_context
         opt_id      => 'extended_context',
         type        => 'bool',
         label       => 'Extended Context Menu',
         tooltip     => 'If this is enabled, the Extended Context Menu will become accessible.',
         default     => $Slic3r::GUI::Settings->{_}{extended_context}  // 0,
     ));
-    $optgroup->append_single_option_line(Slic3r::GUI::OptionsGroup::Option->new(
+    $optgroup->append_single_option_line(Slic3r::GUI::OptionsGroup::Option->new(    # extended_context_toolbar
         opt_id      => 'extended_context_toolbar',
         type        => 'bool',
         label       => 'Extended Toolbar',
