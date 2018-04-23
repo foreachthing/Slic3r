@@ -528,7 +528,7 @@ sub clip_with_object {
         # We leave a gap equal to a full extrusion width.
         $support->{$i} = diff(
             $support->{$i},
-            offset([ map @$_, map @{$_->slices}, @layers ], + 2.5 * $self->flow->scaled_width),
+            offset([ map @$_, map @{$_->slices}, @layers ], + 3 * $self->flow->scaled_width),
         );
     }
 }
